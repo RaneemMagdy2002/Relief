@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+    <button id="checkout-button" data-request-id="<%= requestId %>">Pay Now</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const requestId = document.getElementById('checkout-button').getAttribute('data-request-id');
+            const response = await fetch(`/api/V1/requests/special/${requestId}/payment-intent`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const { id: sessionId } = await response.json();
+            const stripe = Stripe('pk_test_51PRXLGAXhonOZxN3OvikmVnUkBpzmwZe3MinjDiYHVJWgQ0xnu5OSzArk5EaF6PCzQaSzibr8QNPAfpiDzx76Um300tq446lSD'); // Replace with your actual Stripe publishable key
+
+            // Redirect to Stripe Checkout
+            const { error } = await stripe.redirectToCheckout({
+                sessionId: sessionId,
+            });
+
+            if (error) {
+                console.error('Error redirecting to Stripe Checkout:', error);
+            }
+        });
+    </script>
+</body>
+</html>
